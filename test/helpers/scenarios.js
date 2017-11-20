@@ -204,6 +204,10 @@ module.exports.runActions = (scenario, abspath) => {
         debug('- mv', action.src, action.dst)
         return fs.rename(abspath(action.src), abspath(action.dst))
 
+      case 'copy':
+        debug('- copy', action.src, action.dst)
+        return fs.copy(abspath(action.src), abspath(action.dst))
+
       case 'wait':
         debug('- wait', action.ms)
         return Promise.delay(action.ms)

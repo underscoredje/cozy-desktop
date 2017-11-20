@@ -1,0 +1,42 @@
+[
+  {
+    "type": "addDir",
+    "path": "dir2",
+    "stats": {
+      "ino": 15835215,
+      "size": 136,
+      "mtime": "2017-11-20T08:30:51.000Z",
+      "ctime": "2017-11-20T08:30:51.000Z"
+    }
+  },
+  {
+    "type": "addDir",
+    "path": "dir2/empty-subdir",
+    "stats": {
+      "ino": 15835216,
+      "size": 68,
+      "mtime": "2017-11-20T08:30:51.000Z",
+      "ctime": "2017-11-20T08:30:51.000Z"
+    }
+  },
+  {
+    "type": "addDir",
+    "path": "dir2/subdir",
+    "stats": {
+      "ino": 15835217,
+      "size": 102,
+      "mtime": "2017-11-20T08:30:51.000Z",
+      "ctime": "2017-11-20T08:30:51.000Z"
+    }
+  },
+  {
+    "type": "add",
+    "path": "dir2/subdir/file",
+    "stats": {
+      "ino": 15835218,
+      "size": 8,
+      "mtime": "2017-11-20T08:30:51.000Z",
+      "ctime": "2017-11-20T08:30:51.000Z"
+    }
+  }
+]
