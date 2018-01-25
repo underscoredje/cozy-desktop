@@ -13,7 +13,7 @@ import pouchdbBuilders from '../../builders/pouchdb'
 import configHelpers from '../../helpers/config'
 import { onPlatform } from '../../helpers/platform'
 import pouchHelpers from '../../helpers/pouch'
-import { builders } from '../../helpers/cozy'
+import Builders from '../../builders'
 
 import { createMetadata } from '../../../core/conversion'
 import * as metadata from '../../../core/metadata'
@@ -29,6 +29,8 @@ import type { Metadata } from '../../../core/metadata'
 const { assignId, ensureValidPath } = metadata
 
 describe('RemoteWatcher', function () {
+  let builders
+
   before('instanciate config', configHelpers.createConfig)
   before('register OAuth client', configHelpers.registerClient)
   before(pouchHelpers.createDatabase)
@@ -42,6 +44,7 @@ describe('RemoteWatcher', function () {
     })
     this.events = new EventEmitter()
     this.watcher = new RemoteWatcher(this.pouch, this.prep, this.remoteCozy, this.events)
+    builders = new Builders(this.remoteCozy.client, this.pouch)
   })
   afterEach(function removeEventListeners () {
     this.events.removeAllListeners()
@@ -101,15 +104,16 @@ describe('RemoteWatcher', function () {
   describe('watch', function () {
     const lastLocalSeq = '123'
     const lastRemoteSeq = lastLocalSeq + '456'
-    const changes = {
-      last_seq: lastRemoteSeq,
-      docs: [
-        builders.remote.file().build(),
-        builders.remote.dir().build()
-      ]
-    }
+    let changes
 
     beforeEach(function () {
+      changes = {
+        last_seq: lastRemoteSeq,
+        docs: [
+          builders.remote.file().build(),
+          builders.remote.dir().build()
+        ]
+      }
       sinon.stub(this.pouch, 'getRemoteSeqAsync')
       sinon.stub(this.pouch, 'setRemoteSeqAsync')
       sinon.stub(this.watcher, 'pullMany')
@@ -148,14 +152,15 @@ describe('RemoteWatcher', function () {
   }
 
   describe('pullMany', function () {
-    const docs = [
-      builders.remote.file().build(),
-      {_id: pouchdbBuilders.id(), _rev: pouchdbBuilders.rev(), _deleted: true}
-    ]
+    let docs
     let apply
     let findMaybe
 
     beforeEach(function () {
+      docs = [
+        builders.remote.file().build(),
+        {_id: pouchdbBuilders.id(), _rev: pouchdbBuilders.rev(), _deleted: true}
+      ]
       apply = sinon.stub(this.watcher, 'apply')
       findMaybe = sinon.stub(this.remoteCozy, 'findMaybe')
     })
@@ -241,6 +246,49 @@ describe('RemoteWatcher', function () {
 
       should(apply.calledOnce).be.true()
       should(apply.args[0][0].doc).deepEqual(doc)
+    })
+
+    it.only('moves a directory before adding new files to the destination', async function () {
+      await builders.metadata.dir().path('Administratif/Billets de train').create()
+      const addedFile: RemoteDoc = {
+        "_id": "81875c036d278706d8e590463e934529",
+        "_rev": "2-5e6050be1f9bb5caff0753db61085afa",
+        "class": "pdf",
+        "created_at": "2018-01-24T16:38:20Z",
+        "dir_id": "87a477775bfa3b753f66c3ed1cf25575",
+        "executable": false,
+        "md5sum": "ckasewHpjveEvD+cGwze1Q==",
+        "mime": "application/pdf",
+        "name": "2018_01_04_8b61_Trainline.pdf",
+        "size": "52773",
+        "tags": [],
+        "trashed": false,
+        "type": "file",
+        "updated_at": "2018-01-24T16:38:20Z",
+        "path": "/Administratif/Billets de train/2018_01_04_8b61_Trainline.pdf"
+      }
+      const movedDir: RemoteDoc = {
+        "_id": "ff35786eacc8bb9c8b09b89f03e296da",
+        "_rev": "3-c75c3b4b9a4134d409e0d783bf595946",
+        "created_at": "2017-07-20T11:46:28.756527736Z",
+        "dir_id": "ff35786eacc8bb9c8b09b89f03e0941c",
+        "name": "Billets de train",
+        "path": "/Administratif/Billets de train",
+        "referenced_by": [
+          {
+            "id": "io.cozy.konnectors%2Ftrainline",
+            "type": "io.cozy.konnectors"
+          }
+        ],
+        "tags": [],
+        "type": "directory",
+        "updated_at": "2018-01-24T16:40:01.261Z"
+      }
+
+      await this.watcher.pullMany([movedDir, addedFile])
+
+      should(apply.args.map(args => args[0].type))
+        .deepEqual(['FolderMoved', 'FileAdded'])
     })
   })
 
