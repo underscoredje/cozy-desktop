@@ -251,38 +251,39 @@ describe('RemoteWatcher', function () {
     it.only('moves a directory before adding new files to the destination', async function () {
       await builders.metadata.dir().path('Administratif/Billets de train').create()
       const addedFile: RemoteDoc = {
-        "_id": "81875c036d278706d8e590463e934529",
-        "_rev": "2-5e6050be1f9bb5caff0753db61085afa",
-        "class": "pdf",
-        "created_at": "2018-01-24T16:38:20Z",
-        "dir_id": "87a477775bfa3b753f66c3ed1cf25575",
-        "executable": false,
-        "md5sum": "ckasewHpjveEvD+cGwze1Q==",
-        "mime": "application/pdf",
-        "name": "2018_01_04_8b61_Trainline.pdf",
-        "size": "52773",
-        "tags": [],
-        "trashed": false,
-        "type": "file",
-        "updated_at": "2018-01-24T16:38:20Z",
-        "path": "/Administratif/Billets de train/2018_01_04_8b61_Trainline.pdf"
+        _type: FILES_DOCTYPE,
+        _id: '81875c036d278706d8e590463e934529',
+        _rev: '2-5e6050be1f9bb5caff0753db61085afa',
+        class: 'pdf',
+        created_at: '2018-01-24T16:38:20Z',
+        dir_id: '87a477775bfa3b753f66c3ed1cf25575',
+        executable: false,
+        md5sum: 'ckasewHpjveEvD+cGwze1Q==',
+        mime: 'application/pdf',
+        name: '2018_01_04_8b61_Trainline.pdf',
+        size: '52773',
+        tags: [],
+        type: 'file',
+        updated_at: '2018-01-24T16:38:20Z',
+        path: '/Administratif/Billets de train/2018_01_04_8b61_Trainline.pdf'
       }
       const movedDir: RemoteDoc = {
-        "_id": "ff35786eacc8bb9c8b09b89f03e296da",
-        "_rev": "3-c75c3b4b9a4134d409e0d783bf595946",
-        "created_at": "2017-07-20T11:46:28.756527736Z",
-        "dir_id": "ff35786eacc8bb9c8b09b89f03e0941c",
-        "name": "Billets de train",
-        "path": "/Administratif/Billets de train",
-        "referenced_by": [
+        _type: FILES_DOCTYPE,
+        _id: 'ff35786eacc8bb9c8b09b89f03e296da',
+        _rev: '3-c75c3b4b9a4134d409e0d783bf595946',
+        created_at: '2017-07-20T11:46:28.756527736Z',
+        dir_id: 'ff35786eacc8bb9c8b09b89f03e0941c',
+        name: 'Billets de train',
+        path: '/Administratif/Billets de train',
+        referenced_by: [
           {
-            "id": "io.cozy.konnectors%2Ftrainline",
-            "type": "io.cozy.konnectors"
+            'id': 'io.cozy.konnectors%2Ftrainline',
+            'type': 'io.cozy.konnectors'
           }
         ],
-        "tags": [],
-        "type": "directory",
-        "updated_at": "2018-01-24T16:40:01.261Z"
+        tags: [],
+        type: 'directory',
+        updated_at: '2018-01-24T16:40:01.261Z'
       }
 
       await this.watcher.pullMany([movedDir, addedFile])
