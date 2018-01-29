@@ -29,6 +29,14 @@ export class SyncDirTestHelpers {
     await fs.ensureDir(this.abspath(target))
   }
 
+  async writeFile (target: string|PathObject, content: string) {
+    await fs.writeFile(this.abspath(target), content)
+  }
+
+  async move (src: string|PathObject, dst: string|PathObject) {
+    await fs.rename(this.abspath(src), this.abspath(dst))
+  }
+
   async unlink (target: string|PathObject) {
     await fs.unlinkAsync(this.abspath(target))
   }
