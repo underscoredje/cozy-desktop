@@ -75,33 +75,32 @@ describe('TRELLO #484: Local sort before squash (https://trello.com/c/RcRmqymw)'
 
     // Simulate dir moved while uploading
     const stub = sinon.stub(remote, 'addFileAsync')
+    let p
     stub.onSecondCall().callsFake(async doc => {
       console.log('SIMULATE MOVE')
       await syncDir.move('src', 'dst')
+      p = helpers.local.simulateEvents([
+        {type: 'unlinkDir', path: 'src'},
+        {type: 'addDir', path: 'dst', stats: {ino: 4, mtime, ctime}},
+        {type: 'unlink', path: 'src/file1'},
+        {type: 'unlink', path: 'src/file2'},
+        {type: 'unlink', path: 'src/file3'},
+        {type: 'add', path: 'dst/file1', stats: {ino: 1, size: 1, mtime, ctime}},
+        {type: 'add', path: 'dst/file2', stats: {ino: 2, size: 2, mtime, ctime}},
+        {type: 'add', path: 'dst/file3', stats: {ino: 3, size: 3, mtime, ctime}}
+      ]).then(() => helpers.syncAll())
       return addFileAsync.call(remote, doc)
     })
     stub.callThrough()
     await helpers.syncAll()
-
-    await helpers.local.simulateEvents([
-      {type: 'unlinkDir', path: 'src'},
-      {type: 'addDir', path: 'dst', stats: {ino: 4, mtime, ctime}},
-      {type: 'unlink', path: 'src/file1'},
-      {type: 'unlink', path: 'src/file2'},
-      {type: 'unlink', path: 'src/file3'},
-      {type: 'add', path: 'dst/file1', stats: {ino: 1, size: 1, mtime, ctime}},
-      {type: 'add', path: 'dst/file2', stats: {ino: 2, size: 2, mtime, ctime}},
-      {type: 'add', path: 'dst/file3', stats: {ino: 3, size: 3, mtime, ctime}}
-    ])
-    await helpers.syncAll()
+    await p
 
     should(await helpers.remote.tree()).deepEqual([
       '.cozy_trash/',
       'dst/',
       'dst/file1',
       'dst/file2',
-      'dst/file3',
-      'whatever'
+      'dst/file3'
     ])
   })
 })
